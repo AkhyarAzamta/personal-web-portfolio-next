@@ -1,6 +1,6 @@
 import React from "react";
 import TerminalIcon from "@mui/icons-material/Terminal";
-import SettingsEthernetIcon from "@mui/icons-material/SettingsEthernet";
+import TipsAndUpdatesIcon from '@mui/icons-material/TipsAndUpdates';
 import CodeIcon from "@mui/icons-material/Code";
 import ExtensionIcon from "@mui/icons-material/Extension";
 import SafeImage from "@/components/safe-image";
@@ -125,9 +125,9 @@ export default function Skills({ skills = [], job_positions = [] }: SkillsProps)
         {uniqueAdditionalSkills.length > 0 && (
           <div>
             <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-6">
-              <SettingsEthernetIcon className="text-xl md:text-2xl text-electric-purple" />
+              <TipsAndUpdatesIcon className="text-xl md:text-2xl text-electric-purple" />
               <h3 className="font-headline-md text-sm md:text-body-lg text-electric-purple uppercase tracking-widest">
-                ADDITIONAL_SKILLS
+                EXPERIMENTAL_STACK
               </h3>
             </div>
             <div className="flex flex-wrap gap-4 skill-group">

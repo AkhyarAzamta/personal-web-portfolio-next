@@ -67,7 +67,7 @@ export default function Logs({ blogs = [] }: LogsProps) {
             return (
               <article
                 key={blog.id}
-                className="shrink-0 w-[85%] sm:w-[60%] md:w-auto snap-center md:snap-align-none group relative bg-background-surface p-3 md:p-4 transition-all duration-300 hover:-translate-y-1"
+                className="shrink-0 w-[65%] sm:w-[60%] md:w-auto snap-center md:snap-align-none group relative bg-background-surface p-3 md:p-4 transition-all duration-300 hover:-translate-y-1"
                 style={{ border: `1px solid ${accentHex}33` }}
               >
                 {/* Sudut dekoratif */}

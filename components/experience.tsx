@@ -52,7 +52,7 @@ export default function Experience({ experiences = [] }: ExperienceProps) {
               {/* Header row: title/company ↔ period/badge */}
               <div className="flex flex-col md:flex-row md:justify-between items-start mb-3 md:mb-4">
                 <div>
-                  <h3 className="font-code-md text-sm md:text-body-lg text-neon-cyan group-hover:text-white transition-colors duration-300 mb-1">
+                  <h3 className="font-code-md text-sm md:text-lg md:text-body-lg text-neon-cyan group-hover:text-white transition-colors duration-300 mb-1">
                     {exp.title}
                   </h3>
                   <p className="font-label-sm text-[10px] md:text-label-sm text-on-surface-variant uppercase tracking-wider">

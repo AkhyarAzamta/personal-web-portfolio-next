@@ -1,6 +1,7 @@
 import React from "react";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import SafeImage from "@/components/safe-image";
+import Link from "next/link";
 
 interface Technology {
   id: number;
@@ -29,6 +30,7 @@ interface Stats {
 interface Project {
   id: number;
   title: string;
+  slug: string;
   description: string;
   image_url: string;
   demoLink?: string;
@@ -44,6 +46,8 @@ interface ProjectsProps {
 }
 
 export default function Projects({ projects = [] }: ProjectsProps) {
+  const sortedProjects = [...projects].sort((a, b) => b.id - a.id);
+
   return (
     <section className="mt-20 md:mt-32" id="projects">
       {/* Header */}
@@ -66,13 +70,15 @@ export default function Projects({ projects = [] }: ProjectsProps) {
       </div>
 
       {/* Grid Projects */}
-      <div className="flex overflow-x-auto hide-scrollbar snap-x snap-mandatory md:grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 pb-4 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0">
-        {projects && projects.length > 0 ? (
+      <div className="flex overflow-x-auto hide-scrollbar snap-x snap-mandatory md:grid md:overflow-visible md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 pb-4 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0">
+        {sortedProjects && sortedProjects.length > 0 ? (
           <>
-            {projects.map((project, index) => (
+            {sortedProjects.map((project, index) => (
               <div
                 key={project.id || index}
-                className="shrink-0 w-[85%] sm:w-[60%] md:w-auto snap-center md:snap-align-none group relative bg-background-surface border border-white/10 hover:border-neon-cyan/50 transition-all duration-300 p-3 md:p-4"
+                className={`shrink-0 w-[65%] sm:w-[60%] md:w-auto snap-center md:snap-align-none group relative bg-background-surface border border-white/10 hover:border-neon-cyan/50 transition-all duration-300 p-3 md:p-4 ${
+                  index >= 3 ? "md:hidden" : ""
+                }`}
               >
               {/* Dekorasi garis tepi */}
               <div className="absolute top-0 left-0 w-full h-1 bg-electric-purple/20 group-hover:bg-neon-cyan transition-colors duration-300"></div>
@@ -98,12 +104,19 @@ export default function Projects({ projects = [] }: ProjectsProps) {
 
               {/* Judul & status */}
               <div className="flex flex-col md:flex-row justify-between md:items-start mb-2 md:mb-3 gap-1 md:gap-0">
-                <h3
-                  className="font-code-md text-xs md:text-body-lg text-neon-cyan group-hover:text-white transition-colors duration-300 glitch-hover line-clamp-2 md:line-clamp-1"
-                  data-text={project.title}
+                <Link
+                  href={`https://akazdev.my.id/projects/${project.slug}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block"
                 >
-                  {project.title}
-                </h3>
+                  <h3
+                    className="font-code-md text-xs md:text-body-lg text-neon-cyan group-hover:text-white transition-colors duration-300 glitch-hover line-clamp-2"
+                    data-text={project.title}
+                  >
+                    {project.title}
+                  </h3>
+                </Link>
                 <span className="font-code-md text-[10px] text-terminal-gray border border-white/20 px-1 md:px-2 py-0.5 md:py-1 shrink-0 group-hover:border-neon-cyan/30 self-start">
                   SYS_OK
                 </span>
