@@ -1,65 +1,228 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState, useEffect } from "react";
+import Header from "@/components/header";
+import Footer from "@/components/footer";
+import Hero from "@/components/hero";
+import Projects from "@/components/projects";
+import Experience from "@/components/experience";
+import Education from "@/components/education";
+import Certifications from "@/components/certifications";
+import Logs from "@/components/logs";
+import Skills from "@/components/skills";
+import Contact from "@/components/contact";
+import Console from "@/components/console";
+import ScrollAnimations from "@/components/scroll-animations";
+import LoadingScreen from "@/components/loading-screen";
+
+// ─── Tipe Data ────────────────────────────────────────────────────────────────
+
+interface SocialMedia {
+  github?: string;
+  linkedin?: string;
+  instagram?: string;
+  [key: string]: string | undefined;
+}
+
+interface Profile {
+  id: number;
+  name: string;
+  email: string;
+  phone_number: string;
+  bio: string;
+  photo_profile_url: string;
+  social_media: SocialMedia;
+}
+
+interface Technology {
+  id: number;
+  name: string;
+  icon_url: string;
+  color: string;
+}
+
+export interface JobPosition {
+  id: number;
+  name: string;
+  slug: string;
+  description: string;
+  icon_url: string | null;
+  color: string;
+  technologies?: Technology[]; // opsional
+}
+
+export interface Skill {
+  id: number;
+  level: string; // "beginner" | "intermediate" | "advanced"
+  experience_months: number;
+  is_primary: boolean;
+  technology: Technology;
+  job_position: {
+    id: number;
+    name: string;
+  } | null;
+}
+
+interface Category {
+  id: number;
+  name: string;
+  icon_url: string | null;
+  color: string;
+}
+
+interface Stats {
+  downloads_count: number;
+  views_count: number;
+  average_rating: number;
+  favorites_count: number;
+  purchases_count: number;
+  reviews_count: number;
+  total_revenue?: number;
+}
+
+export interface Project {
+  id: number;
+  title: string;
+  slug: string;
+  description: string;
+  image_url: string;
+  demoLink: string;
+  sourceCode: string;
+  price: string;
+  technologies: Technology[];
+  categories: Category[];
+  stats: Stats;
+}
+
+export interface Experience {
+  id: number;
+  title: string;
+  company: string;
+  period: string;
+  description: string[] | string;
+  is_current: boolean;
+}
+
+export interface Education {
+  id: number;
+  degree: string;
+  institution: string;
+  period: string;
+  description: string | null;
+  grade: number | null;
+}
+
+export interface Certificate {
+  id: number;
+  name: string;
+  issuer: string;
+  issue_date: string;
+  expiry_date: string;
+  credential_url: string;
+  image_url: string;
+}
+
+interface Tag {
+  id: number;
+  name: string;
+  slug: string;
+}
+
+export interface Blog {
+  id: number;
+  title: string;
+  slug: string;
+  excerpt: string;
+  featured_image_url: string;
+  published_at: string;
+  view_count: number;
+  reading_time: number;
+  tags: Tag[];
+}
+
+interface PortfolioData {
+  profile: Profile;
+  job_positions: JobPosition[];
+  skills: Skill[];
+  projects: Project[];
+  experiences: Experience[];
+  educations: Education[];
+  certificates: Certificate[];
+  blogs: Blog[];
+}
+
+// ─── Halaman ──────────────────────────────────────────────────────────────────
+
+export default function HomePage() {
+  const [portfolioData, setPortfolioData] = useState<PortfolioData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [loadingScreenDone, setLoadingScreenDone] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch(`${apiUrl}/api/v1/portfolio/akhyarazamta`);
+        if (!res.ok) throw new Error("Gagal mengambil data portfolio");
+        const json = await res.json();
+        if (!json.success) throw new Error("API mengembalikan success: false");
+        setPortfolioData(json.data);
+      } catch (err) {
+        console.error("Error fetching portfolio:", err);
+        setError("Gagal memuat data portfolio. Silakan coba lagi nanti.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [apiUrl]);
+
+  // Scroll to hash after loading screen is completely done
+  useEffect(() => {
+    if (loadingScreenDone && window.location.hash) {
+      const id = window.location.hash.substring(1);
+      setTimeout(() => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 100);
+    }
+  }, [loadingScreenDone]);
+
+  if (!loadingScreenDone) {
+    return <LoadingScreen isLoading={loading} onComplete={() => setLoadingScreenDone(true)} />;
+  }
+
+  if (error || !portfolioData) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background-deep">
+        <div className="text-error font-code-md">{error || "Data tidak ditemukan"}</div>
+      </div>
+    );
+  }
+
+  const { profile, projects, experiences, educations, certificates, skills, job_positions, blogs } =
+    portfolioData;
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+    <>
+      <Header profile={profile} activePage="TERMINAL" />
+      <main className="pt-24 pb-20 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto relative z-10">
+        <Hero profile={profile} />
+        <Projects projects={projects} />
+        <Experience experiences={experiences} />
+        <Education educations={educations} />
+        <Certifications certificates={certificates} />
+        <Logs blogs={blogs} />
+        <Skills skills={skills} job_positions={job_positions} />
+        <Contact />
       </main>
-    </div>
+      <Console />
+      <Footer profileName={profile.name} />
+      <ScrollAnimations />
+    </>
   );
 }
