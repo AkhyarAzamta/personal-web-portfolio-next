@@ -14,6 +14,8 @@ interface ExperienceProps {
 }
 
 export default function Experience({ experiences = [] }: ExperienceProps) {
+  const sortedExperiences = [...experiences].sort((a, b) => b.id - a.id);
+
   const getDescriptionArray = (desc: string[] | string): string[] => {
     if (Array.isArray(desc)) return desc;
     if (typeof desc === "string") return desc.split("\n").filter(Boolean);
@@ -34,8 +36,8 @@ export default function Experience({ experiences = [] }: ExperienceProps) {
 
       {/* Timeline */}
       <div className="relative ml-4 pl-12 timeline-line space-y-8 md:space-y-12">
-        {experiences && experiences.length > 0 ? (
-          experiences.map((exp) => (
+        {sortedExperiences && sortedExperiences.length > 0 ? (
+          sortedExperiences.map((exp) => (
             <div key={exp.id} className="relative group">
               {/* Dot timeline */}
               <div
