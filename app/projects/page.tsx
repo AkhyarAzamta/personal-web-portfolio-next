@@ -7,7 +7,6 @@ import Console from "@/components/console";
 import ScrollAnimations from "@/components/scroll-animations";
 import AnalyticsIcon from "@mui/icons-material/Analytics";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
-import Image from "next/image";
 import SafeImage from "@/components/safe-image";
 import LoadingScreen from "@/components/loading-screen";
 import { getCached, setCache } from "@/lib/data-cache";
@@ -218,7 +217,7 @@ export default function ProjectsPage() {
                     <div key={project.id} className="relative fade-in-up">
                       {/* Timeline Dot */}
                       <div
-                        className={`absolute -left-[34px] md:-left-[51px] top-0 w-3 h-3 md:w-5 md:h-5 ${
+                        className={`absolute -left-8.5 md:-left-12.75 top-0 w-3 h-3 md:w-5 md:h-5 ${
                           isLatest ? `shadow-[0_0_10px_${hexColor}]` : "bg-outline-variant"
                         }`}
                         style={isLatest ? { background: hexColor } : {}}
