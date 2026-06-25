@@ -9,6 +9,7 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import CodeIcon from "@mui/icons-material/Code";
 import SafeImage from "@/components/safe-image";
 import LoadingScreen from "@/components/loading-screen";
+import { getCached, setCache } from "@/lib/data-cache";
 
 // ─── Tipe Data ──────────────────────────────────────────────────────────────
 
@@ -51,17 +52,32 @@ function formatDate(dateStr: string): string {
 // ─── Halaman ──────────────────────────────────────────────────────────────────
 
 export default function BlogsPage() {
-  const [blogs, setBlogs] = useState<Blog[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [lastPage, setLastPage] = useState(1);
-  const [totalBlogs, setTotalBlogs] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [loadingScreenDone, setLoadingScreenDone] = useState(false);
+  type BlogsCache = { blogs: Blog[]; currentPage: number; lastPage: number; total: number };
+  const initialCacheKey = "portfolio_blogs_page_1";
+  const initialCache = getCached<BlogsCache>(initialCacheKey);
+
+  const [blogs, setBlogs] = useState<Blog[]>(() => initialCache?.blogs ?? []);
+  const [currentPage, setCurrentPage] = useState(() => initialCache?.currentPage ?? 1);
+  const [lastPage, setLastPage] = useState(() => initialCache?.lastPage ?? 1);
+  const [totalBlogs, setTotalBlogs] = useState(() => initialCache?.total ?? 0);
+  const [loading, setLoading] = useState(() => initialCache === null);
+  const [loadingScreenDone, setLoadingScreenDone] = useState(() => initialCache !== null);
   const [error, setError] = useState<string | null>(null);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
   useEffect(() => {
+    const cacheKey = `portfolio_blogs_page_${currentPage}`;
+    const cached = getCached<BlogsCache>(cacheKey);
+
+    // Jika halaman ini sudah pernah di-fetch, tampilkan dari cache tanpa loading
+    if (cached) {
+      setBlogs(cached.blogs);
+      setLastPage(cached.lastPage);
+      setTotalBlogs(cached.total);
+      return;
+    }
+
     const fetchBlogs = async () => {
       setLoading(true);
       try {
@@ -70,10 +86,12 @@ export default function BlogsPage() {
         const json: BlogsResponse = await res.json();
         if (json.success) {
           const blogData = json.data || [];
+          const meta = { currentPage: json.meta?.current_page || 1, lastPage: json.meta?.last_page || 1, total: json.meta?.total || 0 };
           setBlogs(blogData);
-          setCurrentPage(json.meta?.current_page || 1);
-          setLastPage(json.meta?.last_page || 1);
-          setTotalBlogs(json.meta?.total || 0);
+          setCurrentPage(meta.currentPage);
+          setLastPage(meta.lastPage);
+          setTotalBlogs(meta.total);
+          setCache<BlogsCache>(cacheKey, { blogs: blogData, ...meta });
         } else {
           throw new Error("API returned success: false");
         }

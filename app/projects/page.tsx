@@ -10,6 +10,7 @@ import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import Image from "next/image";
 import SafeImage from "@/components/safe-image";
 import LoadingScreen from "@/components/loading-screen";
+import { getCached, setCache } from "@/lib/data-cache";
 
 // ─── Tipe Data ──────────────────────────────────────────────────────────────
 
@@ -80,32 +81,40 @@ interface ProjectsResponse {
 // ─── Halaman ──────────────────────────────────────────────────────────────────
 
 export default function ProjectsPage() {
-  const [profile, setProfile] = useState<Profile>({
-    id: 0,
-    name: "Akhyar Azamta",
-    email: "",
-    phone_number: "",
-    bio: "",
-    photo_profile_url: "",
-    social_media: {},
-  });
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [totalProjects, setTotalProjects] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [loadingScreenDone, setLoadingScreenDone] = useState(false);
+  type ProjectsCache = { profile: Profile; projects: Project[]; total: number };
+  const CACHE_KEY = "portfolio_projects";
+
+  const [profile, setProfile] = useState<Profile>(
+    () => getCached<ProjectsCache>(CACHE_KEY)?.profile ?? {
+      id: 0, name: "Akhyar Azamta", email: "", phone_number: "", bio: "", photo_profile_url: "", social_media: {},
+    }
+  );
+  const [projects, setProjects] = useState<Project[]>(
+    () => getCached<ProjectsCache>(CACHE_KEY)?.projects ?? []
+  );
+  const [totalProjects, setTotalProjects] = useState(
+    () => getCached<ProjectsCache>(CACHE_KEY)?.total ?? 0
+  );
+  const [loading, setLoading] = useState(() => getCached(CACHE_KEY) === null);
+  const [loadingScreenDone, setLoadingScreenDone] = useState(() => getCached(CACHE_KEY) !== null);
   const [error, setError] = useState<string | null>(null);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
   useEffect(() => {
+    // Jika state sudah terisi dari cache (lazy init), tidak perlu fetch
+    if (getCached(CACHE_KEY) !== null) return;
+
     const fetchData = async () => {
       try {
         // 1. Fetch profile
         const profileRes = await fetch(`${apiUrl}/api/v1/portfolio/akhyarazamta`);
+        let latestProfile = profile;
         if (profileRes.ok) {
           const profileJson = await profileRes.json();
           if (profileJson.success && profileJson.data.profile) {
-            setProfile(profileJson.data.profile);
+            latestProfile = profileJson.data.profile;
+            setProfile(latestProfile);
           }
         }
 
@@ -115,8 +124,10 @@ export default function ProjectsPage() {
           const projectsJson: ProjectsResponse = await projectsRes.json();
           if (projectsJson.success) {
             const projectList = projectsJson.data || [];
+            const total = projectsJson.meta?.total || projectList.length;
             setProjects(projectList);
-            setTotalProjects(projectsJson.meta?.total || projectList.length);
+            setTotalProjects(total);
+            setCache<ProjectsCache>(CACHE_KEY, { profile: latestProfile, projects: projectList, total });
           }
         }
 
@@ -169,7 +180,7 @@ export default function ProjectsPage() {
             PROJECT_ARCHIVE<span className="text-neon-cyan animate-pulse">_</span>
           </h1>
           <p className="font-body-md text-xs md:text-body-lg text-terminal-gray max-w-2xl">
-            Technical breakdown of primary architectural builds and protocol implementations.
+            A comprehensive index of my deployed web applications and software systems.
           </p>
         </header>
 

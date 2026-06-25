@@ -133,7 +133,7 @@ body {
   white-space: nowrap;
   margin: 0 auto;
   letter-spacing: 0.15em;
-  animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+  animation: typing 3.5s steps(32, end) forwards, blink-caret 0.75s step-end infinite;
 }
 
 @keyframes typing {

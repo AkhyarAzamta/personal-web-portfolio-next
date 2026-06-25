@@ -86,7 +86,7 @@ const Header: React.FC<HeaderProps> = ({ profile, activePage = "" }) => {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8 font-code-md text-code-md uppercase tracking-widest">
+          <div className="hidden md:flex items-center gap-6 font-code-md text-xs lg:text-[13px] uppercase tracking-widest">
             {navItems.map((item) => {
               const isActive = activePage === item.label;
               const Icon = item.icon;
@@ -101,7 +101,7 @@ const Header: React.FC<HeaderProps> = ({ profile, activePage = "" }) => {
                       : "text-terminal-gray hover:text-neon-cyan"
                   } transition-colors`}
                 >
-                  <Icon className="text-lg" />
+                  <Icon className="text-base mb-0.5" />
                   {item.label}
                 </Link>
               );

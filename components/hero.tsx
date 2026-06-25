@@ -12,6 +12,14 @@ interface HeroProps {
 }
 
 const Hero: React.FC<HeroProps> = ({ profile }) => {
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
+    e.preventDefault();
+    const el = document.getElementById(targetId);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   const name = profile?.name?.toUpperCase() || "AKHYAR AZAMTA";
   const bio =
     profile?.bio ||
@@ -39,8 +47,10 @@ const Hero: React.FC<HeroProps> = ({ profile }) => {
         </div>
 
         {/* Typewriter */}
-        <div className="font-code-md text-[10px] md:text-code-md text-neon-cyan mb-2 md:mb-4 typewriter w-fit">
-          &gt; INITIALIZING LOGIN SEQUENCE...
+        <div className="w-fit mb-2 md:mb-4">
+          <div className="font-code-md text-[10px] md:text-code-md text-neon-cyan typewriter">
+            &gt; INITIALIZING LOGIN SEQUENCE...
+          </div>
         </div>
 
         {/* Welcome message */}
@@ -74,15 +84,18 @@ const Hero: React.FC<HeroProps> = ({ profile }) => {
         >
           <a
             href="#contact"
+            onClick={(e) => handleNavClick(e, "contact")}
             className="inline-block bg-neon-cyan text-background font-label-sm text-[10px] md:text-label-sm uppercase tracking-widest px-4 py-2 md:px-6 md:py-3 hover:shadow-[0_0_15px_rgba(0,242,255,0.4)] transition-all duration-300 active:scale-95"
           >
             EXECUTE_CONNECT
           </a>
           <a
-            href="#projects"
+            href={process.env.NEXT_PUBLIC_CV_URL || "#"}
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-block bg-transparent border border-neon-cyan text-neon-cyan font-label-sm text-[10px] md:text-label-sm uppercase tracking-widest px-4 py-2 md:px-6 md:py-3 hover:bg-neon-cyan hover:text-background transition-all duration-300 active:scale-95"
           >
-            VIEW_DATASTREAM
+            DOWNLOAD CV
           </a>
         </div>
       </div>

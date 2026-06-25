@@ -21,6 +21,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import SafeImage from "@/components/safe-image";
 import LoadingScreen from "@/components/loading-screen";
+import { getCached, setCache } from "@/lib/data-cache";
 
 // ─── Tipe Data ──────────────────────────────────────────────────────────────
 
@@ -97,20 +98,24 @@ const now = new Date().toISOString().replace("T", " ").slice(0, 19);
 // ─── Halaman ──────────────────────────────────────────────────────────────────
 
 export default function HistoryPage() {
-  const [profile, setProfile] = useState<Profile>({
-    id: 0,
-    name: "Akhyar Azamta",
-    email: "",
-    phone_number: "",
-    bio: "",
-    photo_profile_url: "",
-    social_media: {},
-  });
-  const [experiences, setExperiences] = useState<Experience[]>([]);
-  const [educations, setEducations] = useState<Education[]>([]);
-  const [certificates, setCertificates] = useState<Certificate[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadingScreenDone, setLoadingScreenDone] = useState(false);
+  type HistoryCache = { profile: Profile; experiences: Experience[]; educations: Education[]; certificates: Certificate[] };
+  const CACHE_KEY = "portfolio_history";
+  const defaultProfile: Profile = { id: 0, name: "Akhyar Azamta", email: "", phone_number: "", bio: "", photo_profile_url: "", social_media: {} };
+
+  const [profile, setProfile] = useState<Profile>(
+    () => getCached<HistoryCache>(CACHE_KEY)?.profile ?? defaultProfile
+  );
+  const [experiences, setExperiences] = useState<Experience[]>(
+    () => getCached<HistoryCache>(CACHE_KEY)?.experiences ?? []
+  );
+  const [educations, setEducations] = useState<Education[]>(
+    () => getCached<HistoryCache>(CACHE_KEY)?.educations ?? []
+  );
+  const [certificates, setCertificates] = useState<Certificate[]>(
+    () => getCached<HistoryCache>(CACHE_KEY)?.certificates ?? []
+  );
+  const [loading, setLoading] = useState(() => getCached(CACHE_KEY) === null);
+  const [loadingScreenDone, setLoadingScreenDone] = useState(() => getCached(CACHE_KEY) !== null);
   const [error, setError] = useState<string | null>(null);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -121,6 +126,9 @@ export default function HistoryPage() {
   // ─── Fetch Data ────────────────────────────────────────────────────────────
 
   useEffect(() => {
+    // Jika state sudah terisi dari cache (lazy init), tidak perlu fetch
+    if (getCached(CACHE_KEY) !== null) return;
+
     const fetchData = async () => {
       try {
         const res = await fetch(`${apiUrl}/api/v1/portfolio/akhyarazamta`);
@@ -132,6 +140,12 @@ export default function HistoryPage() {
         setExperiences(data.experiences || []);
         setEducations(data.educations || []);
         setCertificates(data.certificates || []);
+        setCache<HistoryCache>(CACHE_KEY, {
+          profile: data.profile,
+          experiences: data.experiences || [],
+          educations: data.educations || [],
+          certificates: data.certificates || [],
+        });
       } catch (err) {
         console.error("Error fetching history data:", err);
         setError("Failed to load history. Please try again later.");
@@ -235,9 +249,7 @@ export default function HistoryPage() {
             CORE_DUMP<span className="text-neon-cyan animate-pulse">_</span>
           </h1>
           <p className="font-body-md text-xs md:text-body-lg text-terminal-gray max-w-2xl">
-            Trace back the chronological evolution of{" "}
-            {profile.name.toUpperCase().replace(/ /g, "_")} through technical milestones and
-            architectural deployments.
+            A sequential log of my professional career, academic background, and acquired technical certifications.
           </p>
         </header>
 

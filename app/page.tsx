@@ -14,6 +14,7 @@ import Contact from "@/components/contact";
 import Console from "@/components/console";
 import ScrollAnimations from "@/components/scroll-animations";
 import LoadingScreen from "@/components/loading-screen";
+import { getCached, setCache } from "@/lib/data-cache";
 
 // ─── Tipe Data ────────────────────────────────────────────────────────────────
 
@@ -154,20 +155,28 @@ interface PortfolioData {
 // ─── Halaman ──────────────────────────────────────────────────────────────────
 
 export default function HomePage() {
-  const [portfolioData, setPortfolioData] = useState<PortfolioData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [loadingScreenDone, setLoadingScreenDone] = useState(false);
+  const CACHE_KEY = "portfolio_home";
+
+  const [portfolioData, setPortfolioData] = useState<PortfolioData | null>(
+    () => getCached<PortfolioData>(CACHE_KEY)
+  );
+  const [loading, setLoading] = useState(() => getCached(CACHE_KEY) === null);
+  const [loadingScreenDone, setLoadingScreenDone] = useState(() => getCached(CACHE_KEY) !== null);
   const [error, setError] = useState<string | null>(null);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
   useEffect(() => {
+    // Jika state sudah terisi dari cache (lazy init), tidak perlu fetch
+    if (portfolioData !== null) return;
+
     const fetchData = async () => {
       try {
         const res = await fetch(`${apiUrl}/api/v1/portfolio/akhyarazamta`);
         if (!res.ok) throw new Error("Gagal mengambil data portfolio");
         const json = await res.json();
         if (!json.success) throw new Error("API mengembalikan success: false");
+        setCache(CACHE_KEY, json.data);
         setPortfolioData(json.data);
       } catch (err) {
         console.error("Error fetching portfolio:", err);

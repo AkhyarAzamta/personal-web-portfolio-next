@@ -25,6 +25,7 @@ export default function Console({
   ],
 }: ConsoleProps) {
   const [logs, setLogs] = useState<string[]>(initialLogs);
+  const [isOpen, setIsOpen] = useState(true);
   const logContainerRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -63,14 +64,14 @@ export default function Console({
 
   // Auto-scroll to bottom when logs change
   useEffect(() => {
-    if (logContainerRef.current) {
+    if (isOpen && logContainerRef.current) {
       logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
     }
-  }, [logs]);
+  }, [logs, isOpen]);
 
   return (
     <div
-      className="fixed bottom-8 right-8 z-50 w-72 glass-panel border-neon-cyan/50 shadow-[0_0_20px_rgba(0,242,255,0.2)] transition-transform duration-500 hidden lg:flex flex-col"
+      className="fixed bottom-8 right-8 z-50 w-72 glass-panel border-neon-cyan/50 shadow-[0_0_20px_rgba(0,242,255,0.2)] transition-all duration-500 hidden lg:flex flex-col"
       id="system-console"
     >
       {/* Header */}
@@ -80,21 +81,27 @@ export default function Console({
           {title}
         </span>
         <div className="flex gap-1.5">
-          <div className="w-2.5 h-2.5 bg-data-pink rounded-full" />
+          <div 
+            className="w-2.5 h-2.5 bg-data-pink rounded-full cursor-pointer hover:opacity-80 transition-opacity" 
+            onClick={() => setIsOpen(!isOpen)}
+            title="Toggle Console"
+          />
           <div className="w-2.5 h-2.5 bg-tertiary-container rounded-full" />
           <div className="w-2.5 h-2.5 bg-neon-cyan rounded-full" />
         </div>
       </div>
 
       {/* Logs container */}
-      <div
-        ref={logContainerRef}
-        className="p-4 h-48 overflow-y-auto font-code-md text-[10px] text-neon-cyan/80 space-y-1"
-      >
-        {logs.map((log, idx) => (
-          <div key={idx}>{log}</div>
-        ))}
-      </div>
+      {isOpen && (
+        <div
+          ref={logContainerRef}
+          className="p-4 h-48 overflow-y-auto font-code-md text-[10px] text-neon-cyan/80 space-y-1"
+        >
+          {logs.map((log, idx) => (
+            <div key={idx}>{log}</div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
